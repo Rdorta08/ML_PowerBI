@@ -1,50 +1,72 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import os
 from joblib import load
 import shap
-import matplotlib.pyplot as plt
 
-# Cargar modelo y scaler
-clf = load("../models/clf_final.joblib")
-scaler = load("../models/scaler_final.joblib")
+# -------------------------
+# 1. Configuración de rutas
+# -------------------------
+BASE_DIR = os.path.dirname(__file__)            # Carpeta donde está app.py
+MODEL_PATH = os.path.join(BASE_DIR, "../models/clf_final.joblib")
+SCALER_PATH = os.path.join(BASE_DIR, "../models/scaler_final.joblib")
 
-# Título de la app
-st.title("Predicción de Churn de Clientes")
-st.write("Esta app predice la probabilidad de que un cliente se desuscriba del servicio y muestra la explicación con SHAP.")
+# -------------------------
+# 2.  Cargar modelo y scaler
+# -------------------------
+clf = load(MODEL_PATH)
+scaler = load(SCALER_PATH)
 
-# Input del cliente (manual)
-st.sidebar.header("Ingrese datos del cliente")
+# -------------------------
+# 3. Sidebar para inputs de usuario
+# -------------------------
+st.sidebar.header("Parámetros del cliente")
+# Ejemplo: si tus columnas OHE son SubscriptionType_Basic, SubscriptionType_Premium, etc.
+user_input = {
+    'MonthlyCharges': st.sidebar.number_input("Monthly Charges", min_value=0.0, value=15.0),
+    'TotalCharges': st.sidebar.number_input("Total Charges", min_value=0.0, value=300.0),
+    'AccountAge': st.sidebar.number_input("Account Age (months)", min_value=0, value=12),
+    # Variables categóricas
+    'SubscriptionType_Basic': st.sidebar.checkbox("Basic", value=False),
+    'SubscriptionType_Premium': st.sidebar.checkbox("Premium", value=False),
+    'SubscriptionType_Standard': st.sidebar.checkbox("Standard", value=False),
+    # Agrega más variables según tu OHE
+}
 
-def user_input_features():
-    AccountAge = st.sidebar.number_input("Account Age (meses)", min_value=0, value=12)
-    MonthlyCharges = st.sidebar.number_input("Monthly Charges", min_value=0.0, value=12.0)
-    TotalCharges = st.sidebar.number_input("Total Charges", min_value=0.0, value=100.0)
-    # Aquí agregar más variables que tu modelo requiera, numéricas y dummies
-    # Por simplicidad se omiten dummies; podrías agregar selectboxes para variables categóricas
-    data = {'AccountAge': AccountAge,
-            'MonthlyCharges': MonthlyCharges,
-            'TotalCharges': TotalCharges}
-    features = pd.DataFrame(data, index=[0])
-    return features
+# -------------------------
+# 4. Crear DataFrame con todas las columnas de entrenamiento
+# -------------------------
+# Debes tener las columnas finales del X_train_final de tu entrenamiento
+columns_train = [...]  # Lista de todas las columnas numéricas + OHE usadas en entrenamiento
 
-input_df = user_input_features()
+input_df = pd.DataFrame(columns=columns_train)
+for col, val in user_input.items():
+    if col in input_df.columns:
+        input_df.loc[0, col] = val
 
-# Escalar variables numéricas
-input_scaled = scaler.transform(input_df)
+# Rellenar NaN con 0 (para categorías no marcadas)
+input_df = input_df.fillna(0)
 
-# Predecir probabilidad de churn
-prob_churn = clf.predict_proba(input_scaled)[:,1][0]
-pred_class = clf.predict(input_scaled)[0]
+# -------------------------
+# 5. Escalar variables numéricas
+# -------------------------
+input_scaled = scaler.transform(input_df)  # Solo escala las columnas numéricas si tu scaler fue entrenado así
 
-st.write(f"**Probabilidad de Churn:** {prob_churn:.2f}")
-st.write(f"**Predicción:** {'Churn' if pred_class==1 else 'Activo'}")
+# -------------------------
+# 6. Predicción
+# -------------------------
+prob_churn = clf.predict_proba(input_scaled)[:,1][0]  # Probabilidad de churn
+st.subheader("Probabilidad de churn")
+st.write(f"{prob_churn:.2%}")
 
-# Explicación SHAP
-explainer = shap.Explainer(clf, input_scaled)
-shap_values = explainer(input_scaled)
+# -------------------------
+# 7. SHAP
+# -------------------------
+explainer = shap.LinearExplainer(clf, input_scaled)  # Si usaste LogisticRegression
+shap_values = explainer.shap_values(input_scaled)
 
-st.subheader("Explicación SHAP de la predicción")
-fig, ax = plt.subplots()
-shap.plots.bar(shap_values, show=False)
-st.pyplot(fig)
+st.subheader("Impacto de las variables (SHAP)")
+shap.initjs()
+shap.force_plot(explainer.expected_value, shap_values, input_df, matplotlib=True, show=True)
+st.pyplot(bbox_inches='tight')
