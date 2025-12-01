@@ -1,0 +1,27 @@
+# Diccionario de Datos – Subscription Service Churn
+
+Este archivo describe las variables principales del dataset para el proyecto de predicción de churn.
+
+| Variable                   | Tipo        | Nulos | Notas / Uso |
+|----------------------------|------------|-------|-------------|
+| AccountAge                 | Numérica   | 963   | Antiguedad de la cuenta en meses|
+| MonthlyCharges             | Numérica   | 204   | Cargo mensual del servicio |
+| TotalCharges               | Numérica   | 186   | Total pagado por el cliente |
+| SubscriptionType           | Categórica | 50    | Tipo de suscripción|
+| PaymentMethod              | Categórica | 223   | Método de pago|
+| PaperlessBilling           | Dicotómica | 0     | Sí/No. |
+| ContentType                | Categórica | 0     | Tipo de contenido preferido|
+| MultiDeviceAccess          | Dicotómica | 0     | Sí/No|
+| DeviceRegistered           | Categórica | 76    | Dispositivo registrado|
+| ViewingHoursPerWeek        | Numérica   | 0     | Horas promedio de visualización por semana. |
+| AverageViewingDuration     | Numérica   | 0     | Duración promedio de visionado por sesión. |
+| ContentDownloadsPerMonth   | Numérica   | 0     | Número de descargas de contenido al mes. |
+| GenrePreference            | Categórica | 110   | Género preferido|
+| UserRating                 | Numérica   | 261   | Calificación del usuario.|
+| SupportTicketsPerMonth     | Numérica   | 0     | Tickets de soporte por mes|
+| Gender                     | Categórica | 40    | Género del usuario. |
+| WatchlistSize              | Numérica   | 0     | Número de elementos en la watchlist. |
+| ParentalControl            | Dicotómica | 0     | Sí/No.|
+| SubtitlesEnabled           | Categórica | 800   |  |
+| CustomerID                 | Texto      | 0     | Identificador único |
+| Churn                      | Binaria    | 0     | Target del modelo ML (0 = activo, 1 = abandonó). |

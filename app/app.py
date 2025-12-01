@@ -3,110 +3,132 @@ import pandas as pd
 import numpy as np
 from joblib import load
 import shap
+import matplotlib.pyplot as plt
 
-# -----------------------------
-# 1️⃣ Cargar modelos y transformadores
-# -----------------------------
+st.set_page_config(page_title="Churn Prediction App", layout="wide")
+
+st.title("🔮 Customer Churn Prediction & SHAP Analysis")
+
+# ----------------------------------------------------
+# LOAD MODEL & TRANSFORMERS
+# ----------------------------------------------------
 clf = load(r"C:\Users\LENOVO\Documents\GitHub\ML_PowerBI\models\clf_final.joblib")
 scaler = load(r"C:\Users\LENOVO\Documents\GitHub\ML_PowerBI\models\scaler_final.joblib")
-ohe_columns = load(r"C:\Users\LENOVO\Documents\GitHub\ML_PowerBI\models\ohe_columns.joblib")  # lista de columnas OHE generadas en train
-X_train_final = pd.read_csv(r"C:\Users\LENOVO\Documents\GitHub\ML_PowerBI\data\processed\X_train_final.csv", index_col=0)
+ohe = load(r"C:\Users\LENOVO\Documents\GitHub\ML_PowerBI\models\ohe_encoder.joblib")
 
-# -----------------------------
-# 2️⃣ Inputs del usuario en sidebar
-# -----------------------------
-st.title("Predicción de Churn")
-st.sidebar.header("Ingrese los datos del cliente")
-
-# Variables numéricas
-AccountAge = st.sidebar.number_input("Account Age (meses)", min_value=0)
-MonthlyCharges = st.sidebar.number_input("Monthly Charges")
-TotalCharges = st.sidebar.number_input("Total Charges")
-ViewingHoursPerWeek = st.sidebar.number_input("Viewing Hours Per Week")
-AverageViewingDuration = st.sidebar.number_input("Average Viewing Duration")
-ContentDownloadsPerMonth = st.sidebar.number_input("Content Downloads Per Month")
-SupportTicketsPerMonth = st.sidebar.number_input("Support Tickets Per Month")
-WatchlistSize = st.sidebar.number_input("Watchlist Size")
-
-# Variables categóricas
-SubscriptionType = st.sidebar.selectbox("Subscription Type", ["Basic", "Standard", "Premium"])
-PaymentMethod = st.sidebar.selectbox("Payment Method", ["Credit card", "Electronic check", "Bank transfer", "Mailed check"])
-PaperlessBilling = st.sidebar.selectbox("Paperless Billing", ["Yes", "No"])
-ContentType = st.sidebar.selectbox("Content Type", ["Movies", "TV Shows", "Mixed"])
-MultiDeviceAccess = st.sidebar.selectbox("MultiDevice Access", ["Yes", "No"])
-DeviceRegistered = st.sidebar.selectbox("Device Registered", ["Mobile", "Computer", "TV", "Tablet"])
-GenrePreference = st.sidebar.selectbox("Genre Preference", ["Comedy", "Drama", "Action", "Fantasy", "Sci-Fi"])
-Gender = st.sidebar.selectbox("Gender", ["Male", "Female"])
-ParentalControl = st.sidebar.selectbox("Parental Control", ["Yes", "No"])
-
-# -----------------------------
-# 3️⃣ Crear DataFrame del input
-# -----------------------------
-input_dict = {
-    "AccountAge": AccountAge,
-    "MonthlyCharges": MonthlyCharges,
-    "TotalCharges": TotalCharges,
-    "ViewingHoursPerWeek": ViewingHoursPerWeek,
-    "AverageViewingDuration": AverageViewingDuration,
-    "ContentDownloadsPerMonth": ContentDownloadsPerMonth,
-    "SupportTicketsPerMonth": SupportTicketsPerMonth,
-    "WatchlistSize": WatchlistSize,
-    "SubscriptionType": SubscriptionType,
-    "PaymentMethod": PaymentMethod,
-    "PaperlessBilling": PaperlessBilling,
-    "ContentType": ContentType,
-    "MultiDeviceAccess": MultiDeviceAccess,
-    "DeviceRegistered": DeviceRegistered,
-    "GenrePreference": GenrePreference,
-    "Gender": Gender,
-    "ParentalControl": ParentalControl
-}
-input_df = pd.DataFrame([input_dict])
-
-# -----------------------------
-# 4️⃣ Escalar variables numéricas
-# -----------------------------
-numerical_cols = ['AccountAge', 'MonthlyCharges', 'TotalCharges',
-                  'ViewingHoursPerWeek', 'AverageViewingDuration',
-                  'ContentDownloadsPerMonth', 'SupportTicketsPerMonth',
-                  'WatchlistSize']
-
-input_scaled = pd.DataFrame(
-    scaler.transform(input_df[numerical_cols]),
-    columns=numerical_cols
+# SHAP necesita los mismos features del entrenamiento
+X_train_final = pd.read_csv(
+    r"C:\Users\LENOVO\Documents\GitHub\ML_PowerBI\data\processed\X_train_final.csv"
 )
 
-# -----------------------------
-# 5️⃣ One-hot encoding de variables categóricas
-# -----------------------------
-categorical_cols = ["SubscriptionType", "PaymentMethod", "PaperlessBilling",
-                    "ContentType", "MultiDeviceAccess", "DeviceRegistered",
-                    "GenrePreference", "Gender", "ParentalControl"]
+# ----------------------------------------------------
+# DEFINE COLUMNS
+# ----------------------------------------------------
+numerical_cols = [
+    'AccountAge','MonthlyCharges','TotalCharges','ViewingHoursPerWeek',
+    'AverageViewingDuration','ContentDownloadsPerMonth','SupportTicketsPerMonth','WatchlistSize'
+]
 
-input_encoded = pd.get_dummies(input_df[categorical_cols])
-for col in ohe_columns:
-    if col not in input_encoded.columns:
-        input_encoded[col] = 0
-input_encoded = input_encoded[ohe_columns]
+categorical_cols = [
+    "SubscriptionType", "PaymentMethod", "PaperlessBilling",
+    "ContentType", "MultiDeviceAccess", "DeviceRegistered",
+    "Gender", "ParentalControl", "GenrePreference"
+]
 
-# -----------------------------
-# 6️⃣ Concatenar numéricas y categóricas
-# -----------------------------
-input_final = pd.concat([input_scaled, input_encoded], axis=1)
+# ----------------------------------------------------
+# SIDEBAR USER INPUTS
+# ----------------------------------------------------
+st.sidebar.header("🔧 Input del cliente")
 
-# -----------------------------
-# 7️⃣ Predicción
-# -----------------------------
-prob_churn = clf.predict_proba(input_final)[:,1][0]
-st.subheader(f"Probabilidad de Churn: {prob_churn:.2f}")
+user_num = {}
+for col in numerical_cols:
+    user_num[col] = st.sidebar.number_input(col, min_value=0.0, value=10.0)
 
-# -----------------------------
-# 8️⃣ SHAP
-# -----------------------------
-st.header("Importancia de features (SHAP)")
-explainer = shap.LinearExplainer(clf, X_train_final, feature_dependence="independent")
+user_cat = {}
+user_cat["SubscriptionType"] = st.sidebar.selectbox(
+    "SubscriptionType", ["Basic","Standard","Premium"]
+)
+user_cat["PaymentMethod"] = st.sidebar.selectbox(
+    "PaymentMethod", ["Credit card", "Electronic check", "Mailed check"]
+)
+user_cat["PaperlessBilling"] = st.sidebar.selectbox(
+    "PaperlessBilling", ["Yes","No"]
+)
+user_cat["ContentType"] = st.sidebar.selectbox(
+    "ContentType", ["Movies","TV Shows"]
+)
+user_cat["MultiDeviceAccess"] = st.sidebar.selectbox(
+    "MultiDeviceAccess", ["Yes","No"]
+)
+user_cat["DeviceRegistered"] = st.sidebar.selectbox(
+    "DeviceRegistered", ["Mobile","TV","Tablet"]
+)
+user_cat["Gender"] = st.sidebar.selectbox(
+    "Gender", ["Male","Female"]
+)
+user_cat["ParentalControl"] = st.sidebar.selectbox(
+    "ParentalControl", ["Yes","No"]
+)
+user_cat["GenrePreference"] = st.sidebar.selectbox(
+    "GenrePreference", ["Action","Drama","Comedy","Family","Sports"]
+)
+
+input_df = pd.DataFrame({**user_num, **user_cat}, index=[0])
+
+st.write("### 🧾 Datos ingresados")
+st.dataframe(input_df)
+
+# ----------------------------------------------------
+# TRANSFORM INPUT
+# ----------------------------------------------------
+
+# 1. OneHotEncoder
+input_ohe = ohe.transform(input_df[categorical_cols])
+ohe_cols = ohe.get_feature_names_out(categorical_cols)
+input_ohe_df = pd.DataFrame(input_ohe, columns=ohe_cols)
+
+# 2. Scaling numéricas
+input_scaled = scaler.transform(input_df[numerical_cols])
+input_scaled_df = pd.DataFrame(input_scaled, columns=numerical_cols)
+
+# 3. Concatenar
+input_final = pd.concat([input_scaled_df, input_ohe_df], axis=1)
+
+# Alineación con entrenamiento (muy importante)
+missing_cols = set(X_train_final.columns) - set(input_final.columns)
+for col in missing_cols:
+    input_final[col] = 0  # crear columnas faltantes en 0
+
+input_final = input_final[X_train_final.columns]
+
+# ----------------------------------------------------
+# PREDICTION
+# ----------------------------------------------------
+prob_churn = clf.predict_proba(input_final)[0,1]
+prediction = int(prob_churn >= 0.3)
+
+st.markdown("## 🔍 Predicción")
+st.write(f"**Probabilidad de churn:** `{prob_churn:.3f}`")
+
+if prediction == 1:
+    st.error("⚠️ El modelo predice que **EXISTE riesgo de churn**.")
+else:
+    st.success("✔️ El cliente probablemente **se queda**.")
+
+# ----------------------------------------------------
+# SHAP PLOT
+# ----------------------------------------------------
+st.markdown("---")
+st.subheader("📊 Explicación del modelo (SHAP)")
+
+explainer = shap.LinearExplainer(
+    clf,
+    X_train_final,
+    feature_perturbation="independent"
+)
+
 shap_values = explainer.shap_values(input_final)
 
-shap.initjs()
-st_shap_plot = shap.force_plot(explainer.expected_value[1], shap_values[1], input_final)
-st.pyplot(bbox_inches='tight')  # mostrar el gráfico
+fig, ax = plt.subplots(figsize=(10, 3))
+shap.summary_plot(shap_values, input_final, plot_type="bar", show=False)
+st.pyplot(fig)
