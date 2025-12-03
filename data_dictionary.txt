@@ -1,6 +1,6 @@
 # Diccionario de Datos – Subscription Service Churn
 
-Este archivo describe las variables principales del dataset para el proyecto de predicción de churn.
+Este archivo describe las variables principales del dataset para el proyecto de predicción de churn
 
 | Variable                   | Tipo        | Nulos | Notas / Uso |
 |----------------------------|------------|-------|-------------|
