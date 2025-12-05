@@ -1,0 +1,53 @@
+Feature,Mean_SHAP
+AccountAge,0.9385325285563403
+SupportTicketsPerMonth,0.910154690228012
+ContentDownloadsPerMonth,0.8960503021926508
+TotalCharges_log,0.8425930763690684
+AverageViewingDuration,0.8394300061172928
+WatchlistSize,0.8196509384685519
+MonthlyCharges,0.8094410002831973
+ViewingHoursPerWeek,0.8076493599687167
+AccountAge,0.711345136107421
+Gender_Male,0.6269430051813472
+ViewingHoursPerWeek,0.5132968747891903
+MultiDeviceAccess_Yes,0.5129533678756477
+PaperlessBilling_Yes,0.46113989637305697
+ParentalControl_Yes,0.44559585492227977
+AverageViewingDuration,0.42984539864044613
+SubscriptionType_Premium,0.41968911917098445
+DeviceRegistered_Mobile,0.36787564766839376
+GenrePreference_Comedy,0.3626943005181347
+ContentType_Movies,0.35751295336787564
+PaymentMethod_Credit card,0.3471502590673575
+ContentType_TV Shows,0.32642487046632124
+SubscriptionType_Standard,0.30569948186528495
+PaymentMethod_Electronic check,0.2849740932642487
+MonthlyCharges,0.2827372627708764
+ContentDownloadsPerMonth,0.2646240339652996
+SupportTicketsPerMonth,0.2576472440611907
+DeviceRegistered_TV,0.2538860103626943
+DeviceRegistered_Tablet,0.22248834300394854
+GenrePreference_Fantasy,0.20207253886010362
+GenrePreference_Drama,0.19689119170984457
+ContentType_Movies,0.17799068507618607
+PaymentMethod_Credit card,0.17425840292015599
+GenrePreference_Fantasy,0.17017548725070109
+SubscriptionType_Premium,0.15874510408048084
+WatchlistSize,0.1471939151303829
+DeviceRegistered_Tablet,0.12953367875647667
+PaymentMethod_Mailed check,0.1275716483966959
+GenrePreference_Sci-Fi,0.09844559585492228
+GenrePreference_Comedy,0.09800210914081894
+DeviceRegistered_TV,0.09687606482116062
+ContentType_TV Shows,0.08963307076779975
+GenrePreference_Sci-Fi,0.0797627648304693
+PaymentMethod_Mailed check,0.07772020725388601
+ParentalControl_Yes,0.07284332129022063
+TotalCharges_log,0.06139615041187299
+SubscriptionType_Standard,0.06134761445822689
+GenrePreference_Drama,0.05130771357976281
+MultiDeviceAccess_Yes,0.04605380327704384
+PaperlessBilling_Yes,0.032313917599968725
+PaymentMethod_Electronic check,0.027750374345789364
+DeviceRegistered_Mobile,0.025884646401104067
+Gender_Male,0.024144627921574405
