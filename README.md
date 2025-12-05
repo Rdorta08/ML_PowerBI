@@ -30,3 +30,5 @@ Este proyecto analiza el abandono de clientes (churn) en un servicio de suscripc
 | Churn                   | 1 = abandonó, 0 = activo                       |
 
 
+## Dataset disponible en Kagle
+https://www.kaggle.com/datasets/safrin03/predictive-analytics-for-customer-churn-dataset
