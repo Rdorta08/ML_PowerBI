@@ -1,6 +1,6 @@
 # Customer Churn Project
 
-Este proyecto analiza el abandono de clientes (churn) en un servicio de suscripción, aplicando técnicas de limpieza de datos, imputación, feature engineering, modelado y explicación con SHAP.
+Este proyecto analiza el abandono de clientes (churn) en un servicio de suscripción, aplicando limpieza de datos, imputación, modelado predictivo y explicación con SHAP. Además, se integraron los resultados en Power BI para generar insights de negocio.
 
 ## Estructura del proyecto
 
@@ -16,6 +16,27 @@ Este proyecto analiza el abandono de clientes (churn) en un servicio de suscripc
 - Detectar clientes propensos a abandonar el servicio.
 - Maximizar recall de churners.
 - Explicar el modelo con SHAP para decisiones de negocio.
+
+## Flujo de trabajo
+
+1. Preprocesamiento y limpieza de datos:
+- Imputación de valores faltantes en variables categóricas y numéricas.
+- Imputación de PaymentMethod posterior a la partición train/test con Random Forest, evitando data leakage.
+
+2. Modelado predictivo:
+
+- Regresión Logística con escalado y codificación de variables.
+- Balanceo de clases con SMOTE.
+- Ajuste de hiperparámetros con GridSearchCV.
+
+3. Interpretación:
+
+- SHAP values para identificar features más influyentes en el churn.
+- Feature importance para generar insights accionables en negocio.
+
+4. Visualización:
+
+Dashboard en Power BI con vistas de Executive Overview, Segmentación de clientes y ML Insights.
 
 ## Variables clave
 
